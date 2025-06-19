@@ -19,7 +19,7 @@ const GenerationControls: React.FC<GenerationControlsProps> = ({
     <>
       <button
         onClick={handleProcessEncartes}
-        className={`block w-full max-w-xl mx-auto py-4 px-8 bg-green-500 text-black border-none rounded-md text-2xl font-bold uppercase transition-colors ${
+        className={`block w-full max-w-xl mx-auto py-4 px-8 bg-green-500 text-white border-none rounded-md text-2xl font-bold uppercase transition-colors ${
           !checkInputsReady() || processing
             ? "bg-green-800 cursor-not-allowed"
             : "hover:bg-green-600 cursor-pointer"
