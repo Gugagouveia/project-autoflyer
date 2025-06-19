@@ -1,4 +1,3 @@
-// components/GeradorEncartes/GeradorEncartes.tsx
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
@@ -71,10 +70,9 @@ const GeradorEncartes: React.FC = () => {
       type: "info" | "error" | "success" | "step" = "info",
       data: any = null
     ) => {
-      // Use toLocaleDateString and toLocaleTimeString for proper formatting based on locale
       const now = new Date();
-      const datePart = now.toLocaleDateString("pt-BR"); // Example for Brazil date format
-      const timePart = now.toLocaleTimeString("pt-BR"); // Example for Brazil time format
+      const datePart = now.toLocaleDateString("pt-BR");
+      const timePart = now.toLocaleTimeString("pt-BR");
 
       if (!diagnosticMode && type !== "error" && type !== "step") return;
 
@@ -115,7 +113,6 @@ const GeradorEncartes: React.FC = () => {
     setGeneratedPdf(null);
     setGeneratedSvgGrid(null);
     setShowGallery(false);
-    // setShowMappingSection(false); // Keep mapping section open if excel is loaded
     setProcessing(false);
     setProgress(0);
     setTemplateAlert("");
@@ -129,14 +126,13 @@ const GeradorEncartes: React.FC = () => {
 
   // Derived state to check if all inputs are ready for processing
   const checkInputsReady = useCallback((): boolean => {
-    // Explicitly define return type as boolean
     const templateReady = templateSVG !== "";
     const bgReady = bgImage !== null;
     const excelReady = excelData !== null && excelData.length > 0;
     const mappingReady =
       !!columnMapping.codigo &&
       !!columnMapping.produto &&
-      !!columnMapping.promo; // Use !! to explicitly convert to boolean
+      !!columnMapping.promo;
 
     return templateReady && bgReady && excelReady && mappingReady;
   }, [templateSVG, bgImage, excelData, columnMapping]);
@@ -192,7 +188,6 @@ const GeradorEncartes: React.FC = () => {
     if (excelData && bgImage && templateSVG) {
       for (let i = 0; i < excelData.length; i++) {
         const row = excelData[i];
-        // Access product data using the mapped column names
         const codigo = row[columnMapping.codigo!];
         const produto = row[columnMapping.produto!];
         const preco = row[columnMapping.promo!];
@@ -210,6 +205,7 @@ const GeradorEncartes: React.FC = () => {
 
         const data: ProductData = { codigo, produto, preco };
         const modifiedSvgContent = modifySVG(templateSVG, data);
+
         const filenameBase = `encarte_${normalizeString(
           codigo
         )}_${normalizeString(produto)}`;
@@ -227,7 +223,7 @@ const GeradorEncartes: React.FC = () => {
               filenameBase,
               SVG_WIDTH,
               SVG_HEIGHT,
-              addLog // Pass addLog to the utility function
+              addLog
             )
               .then((dataUrl) => {
                 currentPngs.push({
@@ -236,9 +232,10 @@ const GeradorEncartes: React.FC = () => {
                 });
                 if (exportPdf && pdfDoc) {
                   addLog(`Adicionando ${filenameBase}.png ao PDF...`);
-                  // Ensure image is added to the current page or new page
-
                   pdfDoc.addImage(dataUrl, "PNG", 0, 0, SVG_WIDTH, SVG_HEIGHT);
+                  if (i < excelData.length - 1) {
+                    pdfDoc.addPage();
+                  }
                 }
               })
               .catch((error) => {
@@ -248,17 +245,15 @@ const GeradorEncartes: React.FC = () => {
                 );
               })
               .finally(() => {
-                updateProgressBar(i + 1, excelData.length); // Update progress for each item
+                updateProgressBar(i + 1, excelData.length);
               })
           );
         } else {
-          updateProgressBar(i + 1, excelData.length); // Still update progress even if not generating PNG
+          updateProgressBar(i + 1, excelData.length);
         }
       }
     }
 
-    // Wait for all PNGs and PDF additions to complete
-    // Use Promise.allSettled to ensure all promises complete even if some fail
     const results = await Promise.allSettled(pngGenerationPromises);
     results.forEach((result, index) => {
       if (result.status === "rejected") {
@@ -266,7 +261,7 @@ const GeradorEncartes: React.FC = () => {
       }
     });
 
-    setGeneratedPngs(currentPngs); // Update state only after all promises are settled
+    setGeneratedPngs(currentPngs);
     setGeneratedSvgs(currentSvgs);
 
     if (exportSvgGrid) {
@@ -320,13 +315,15 @@ const GeradorEncartes: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 font-sans antialiased">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
+    <div className="h-full w-full text-gray-900 font-sans antialiased flex flex-col items-center">
+      <div className="w-full space-y-12 max-w-7xl">
         <header className="text-center">
-          <h1 className="text-5xl sm:text-6xl font-extrabold text-indigo-700 dark:text-indigo-400 leading-tight tracking-tight mb-4">
+          <h1 className="text-5xl sm:text-6xl font-medium text-green-600 leading-tight tracking-tighter mb-4 drop-shadow-lg">
+            {" "}
+            {/* Verde */}
             Gerador de Encartes
           </h1>
-          <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+          <p className="text-lg sm:text-xl text-gray-700 max-w-2xl mx-auto opacity-90">
             Simplifique a criação de encartes de produtos com nosso gerador
             automático. Importe seus dados, personalize seu template e exporte
             em diversos formatos.
@@ -335,9 +332,23 @@ const GeradorEncartes: React.FC = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
           {/* Input & Control Section */}
-          <section className="space-y-8 bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4 border-b pb-4 border-gray-200 dark:border-gray-700">
-              Passo a Passo
+          <section className="space-y-8 bg-white p-6 sm:p-8 rounded-xl shadow-xl border border-gray-200">
+            <h2 className="text-3xl font-bold text-gray-900 mb-6 pb-4 border-b border-gray-200 flex items-center gap-3">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+                stroke="currentColor"
+                className="w-8 h-8 text-green-500" // Verde
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              Comece Aqui
             </h2>
             <UploadSection
               templateSVG={templateSVG}
@@ -391,8 +402,22 @@ const GeradorEncartes: React.FC = () => {
           </section>
 
           {/* Output & Logs Section */}
-          <section className="space-y-8 bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4 border-b pb-4 border-gray-200 dark:border-gray-700">
+          <section className="space-y-8 bg-white p-6 sm:p-8 rounded-xl shadow-xl border border-gray-200">
+            <h2 className="text-3xl font-bold text-gray-900 mb-6 pb-4 border-b border-gray-200 flex items-center gap-3">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+                stroke="currentColor"
+                className="w-8 h-8 text-green-500" // Verde
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3.75 13.5l10.5-11.25L17.25 9H13.5A2.25 2.25 0 0011.25 11.25v4.5M3.75 13.5L8.25 18m0 0l-3.5-4.5M8.25 18H18.75a2.25 2.25 0 002.25-2.25V10.5M12.75 16.5V9.75"
+                />
+              </svg>
               Resultados e Diagnóstico
             </h2>
             <GallerySection

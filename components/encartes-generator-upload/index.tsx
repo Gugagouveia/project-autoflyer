@@ -1,4 +1,3 @@
-// components/GeradorEncartes/UploadSection.tsx
 "use client";
 
 import {
@@ -125,7 +124,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({
       if (data.length < 2) {
         throw new Error("Planilha vazia ou sem cabeçalho.");
       }
-      const headers: string[] = data[0].map(String); // Ensure headers are strings
+      const headers: string[] = data[0].map(String);
       setExcelHeaders(headers);
       const products = data.slice(1).map((row) => {
         let rowData: { [key: string]: string } = {};
@@ -148,90 +147,114 @@ const UploadSection: React.FC<UploadSectionProps> = ({
     }
   };
 
+  const UploadInput = ({
+    id,
+    label,
+    fileName,
+    alertMessage,
+    onChange,
+    accept,
+    preview,
+  }: {
+    id: string;
+    label: string;
+    fileName: string;
+    alertMessage: string;
+    onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+    accept: string;
+    preview?: string | null;
+  }) => (
+    <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-300 rounded-lg text-center cursor-pointer hover:border-green-500 transition-all duration-300 group">
+      {" "}
+      {/* Verde */}
+      <label
+        htmlFor={id}
+        className="cursor-pointer w-full h-full flex flex-col items-center justify-center"
+      >
+        <div className="p-4 rounded-full bg-gray-200 group-hover:bg-green-600 transition-colors duration-300 mb-4">
+          {" "}
+          {/* Verde */}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+            className="w-10 h-10 text-green-500 group-hover:text-white" // Verde
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 4.5v15m7.5-7.5h-15"
+            />
+          </svg>
+        </div>
+        <span className="text-xl font-semibold text-gray-800 group-hover:text-green-700 transition-colors duration-300">
+          {" "}
+          {/* Verde */}
+          {fileName ? `Alterar ${label}: ${fileName}` : `Carregar ${label}`}
+        </span>
+        <input
+          id={id}
+          type="file"
+          accept={accept}
+          onChange={onChange}
+          className="hidden"
+        />
+        {alertMessage && (
+          <p className="text-red-600 text-sm mt-2">{alertMessage}</p>
+        )}
+        {preview && (
+          <div className="mt-6 w-full max-w-[200px] h-auto border border-gray-300 rounded-md overflow-hidden shadow-sm">
+            <img
+              src={preview.startsWith("data:image/svg+xml") ? preview : preview}
+              alt="Preview"
+              className="w-full h-auto object-cover"
+            />
+          </div>
+        )}
+      </label>
+    </div>
+  );
+
   return (
-    <>
-      <div className="my-10 text-left">
-        <h2 className="text-3xl mb-5 text-white">1. Carregue o Template SVG</h2>
-        <label
-          htmlFor="templateInput"
-          className="inline-block bg-gray-600 text-white py-3 px-6 rounded cursor-pointer text-lg transition-colors hover:bg-gray-700"
-        >
-          {templateFileName
-            ? `Alterar Template: ${templateFileName}`
-            : "Carregar Template SVG"}
-        </label>
-        <input
+    <div className="space-y-8 mt-8">
+      <h2 className="text-2xl font-bold text-gray-900 mb-4">
+        1. Carregue Seus Ativos
+      </h2>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <UploadInput
           id="templateInput"
-          type="file"
-          accept=".svg"
+          label="Template SVG"
+          fileName={templateFileName}
+          alertMessage={templateAlert}
           onChange={handleTemplateInputChange}
-          className="hidden"
+          accept=".svg"
+          preview={
+            templateSVG
+              ? `data:image/svg+xml;utf8,${encodeURIComponent(templateSVG)}`
+              : null
+          }
         />
-        {templateAlert && <p className="text-red-500 mt-2">{templateAlert}</p>}
-        {templateSVG && (
-          <div className="max-w-[300px] mx-auto my-5 border-2 border-green-500 rounded-lg overflow-hidden">
-            <img
-              src={`data:image/svg+xml;utf8,${encodeURIComponent(templateSVG)}`}
-              alt="Template Preview"
-              className="w-full h-auto"
-            />
-          </div>
-        )}
-      </div>
-
-      <div className="my-10 text-left">
-        <h2 className="text-3xl mb-5 text-white">
-          2. Carregue a Imagem de Fundo (PNG/JPG)
-        </h2>
-        <label
-          htmlFor="bgImageInput"
-          className="inline-block bg-gray-600 text-white py-3 px-6 rounded cursor-pointer text-lg transition-colors hover:bg-gray-700"
-        >
-          {bgFileName
-            ? `Alterar Fundo: ${bgFileName}`
-            : "Carregar Imagem de Fundo"}
-        </label>
-        <input
+        <UploadInput
           id="bgImageInput"
-          type="file"
-          accept=".png, .jpg, .jpeg"
+          label="Imagem de Fundo"
+          fileName={bgFileName}
+          alertMessage={bgAlert}
           onChange={handleBgInputChange}
-          className="hidden"
+          accept=".png, .jpg, .jpeg"
+          preview={bgImage}
         />
-        {bgAlert && <p className="text-red-500 mt-2">{bgAlert}</p>}
-        {bgImage && (
-          <div className="max-w-[300px] mx-auto my-5 border-2 border-green-500 rounded-lg overflow-hidden">
-            <img
-              src={bgImage}
-              alt="Background Preview"
-              className="w-full h-auto"
-            />
-          </div>
-        )}
-      </div>
-
-      <div className="my-10 text-left">
-        <h2 className="text-3xl mb-5 text-white">
-          3. Carregue a Planilha de Dados (Excel)
-        </h2>
-        <label
-          htmlFor="excelInput"
-          className="inline-block bg-gray-600 text-white py-3 px-6 rounded cursor-pointer text-lg transition-colors hover:bg-gray-700"
-        >
-          {excelFileName
-            ? `Alterar Planilha: ${excelFileName}`
-            : "Carregar Planilha Excel (.xlsx, .xls)"}
-        </label>
-        <input
+        <UploadInput
           id="excelInput"
-          type="file"
-          accept=".xlsx, .xls"
+          label="Planilha de Dados"
+          fileName={excelFileName}
+          alertMessage={excelAlert}
           onChange={handleExcelInputChange}
-          className="hidden"
+          accept=".xlsx, .xls"
         />
-        {excelAlert && <p className="text-red-500 mt-2">{excelAlert}</p>}
       </div>
-    </>
+    </div>
   );
 };
 
