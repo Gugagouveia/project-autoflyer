@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react"; // Importar useEffect
+import React, { useState, useEffect } from "react";
 import { ColumnMapping } from "../encartes-generator-upload/interfaces";
 
 interface ColumnMappingSectionProps {
@@ -22,11 +22,8 @@ const ColumnMappingSection: React.FC<ColumnMappingSectionProps> = ({
   setColumnMapping,
   addLog,
 }) => {
-  // Novo estado para controlar a confirmação
   const [isMappingConfirmed, setIsMappingConfirmed] = useState<boolean>(false);
 
-  // Efeito para resetar o estado de confirmação quando a seção for escondida
-  // ou quando os cabeçalhos do Excel mudarem (indicando um novo upload)
   useEffect(() => {
     if (!showMappingSection || excelHeaders.length === 0) {
       setIsMappingConfirmed(false);
@@ -41,7 +38,6 @@ const ColumnMappingSection: React.FC<ColumnMappingSectionProps> = ({
       ...prev,
       [key]: e.target.value,
     }));
-    // Se o usuário mudar um mapeamento depois de confirmar, a confirmação é desfeita
     setIsMappingConfirmed(false);
   };
 
@@ -49,19 +45,19 @@ const ColumnMappingSection: React.FC<ColumnMappingSectionProps> = ({
     if (
       !columnMapping.codigo ||
       !columnMapping.produto ||
-      !columnMapping.promo
+      !columnMapping.preço // Já verificando 'preço' aqui
     ) {
       alert("Por favor, mapeie todas as colunas necessárias.");
       addLog("Mapeamento incompleto.", "error");
-      setIsMappingConfirmed(false); // Garante que não está como confirmado se falhar
+      setIsMappingConfirmed(false);
       return;
     }
     addLog("Mapeamento de colunas confirmado.", "success", columnMapping);
-    setIsMappingConfirmed(true); // Define como confirmado
+    setIsMappingConfirmed(true);
   };
 
   const handleEditMapping = () => {
-    setIsMappingConfirmed(false); // Permite editar novamente
+    setIsMappingConfirmed(false);
     addLog("Modo de edição de mapeamento ativado.", "info");
   };
 
@@ -69,9 +65,9 @@ const ColumnMappingSection: React.FC<ColumnMappingSectionProps> = ({
     return null;
   }
 
-  // Verificar se todos os campos necessários estão mapeados
+  // Verificação de todas as colunas mapeadas
   const areAllColumnsMapped =
-    !!columnMapping.codigo && !!columnMapping.produto && !!columnMapping.promo;
+    !!columnMapping.codigo && !!columnMapping.produto && !!columnMapping.preço; // Confirmado 'preço' aqui
 
   return (
     <div className="bg-white p-6 rounded-xl my-8 text-left shadow-xl border border-gray-200">
@@ -117,7 +113,7 @@ const ColumnMappingSection: React.FC<ColumnMappingSectionProps> = ({
         {[
           { label: "Código", key: "codigo" },
           { label: "Produto", key: "produto" },
-          { label: "Preço/Promoção", key: "promo" },
+          { label: "Preço", key: "preço" }, // CORREÇÃO AQUI: Label agora é "Preço"
         ].map(({ label, key }) => (
           <div
             key={key}
@@ -141,9 +137,9 @@ const ColumnMappingSection: React.FC<ColumnMappingSectionProps> = ({
                       ? "border-gray-300 cursor-not-allowed"
                       : "border-green-500"
                   }
-                `} // Desabilita visualmente se confirmado
+                `}
                 value={columnMapping?.[key as keyof ColumnMapping] || ""}
-                disabled={isMappingConfirmed} // Desabilita funcionalmente
+                disabled={isMappingConfirmed}
               >
                 <option value="" disabled>
                   Selecione a coluna
@@ -177,7 +173,7 @@ const ColumnMappingSection: React.FC<ColumnMappingSectionProps> = ({
                 : "bg-gray-400 cursor-not-allowed"
             }
           `}
-          disabled={!areAllColumnsMapped} // Botão desabilitado se nem todas as colunas estiverem mapeadas
+          disabled={!areAllColumnsMapped}
         >
           Confirmar Mapeamento
         </button>

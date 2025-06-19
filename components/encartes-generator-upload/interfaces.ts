@@ -18,6 +18,6 @@ export interface GeneratedOutput {
 export interface ColumnMapping {
   codigo: string | null;
   produto: string | null;
-  promo: string | null;
+  preço: string | null;
   imagem?: string | null; // NOVO: Mapeamento da coluna de imagem
 }

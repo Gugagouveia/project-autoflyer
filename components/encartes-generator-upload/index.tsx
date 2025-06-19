@@ -124,15 +124,46 @@ const UploadSection: React.FC<UploadSectionProps> = ({
       if (data.length < 2) {
         throw new Error("Planilha vazia ou sem cabeçalho.");
       }
-      const headers: string[] = data[0].map(String);
-      setExcelHeaders(headers);
+
+      let rawHeaders: string[] = data[0].map(String);
+      let processedHeaders: string[] = [];
+      const promoIndex = rawHeaders.findIndex(
+        (header) =>
+          header.toLowerCase() === "promo" ||
+          header.toLowerCase() === "promocao"
+      );
+
+      if (promoIndex !== -1) {
+        // Renomeia o cabeçalho "promo" para "preço"
+        processedHeaders = rawHeaders.map((header, index) =>
+          index === promoIndex ? "Preço" : header
+        );
+        addLog(
+          `Cabeçalho "promo" renomeado para "preço" na importação.`,
+          "info",
+          { original: rawHeaders[promoIndex], novo: "Preço" }
+        );
+      } else {
+        processedHeaders = rawHeaders;
+      }
+
+      setExcelHeaders(processedHeaders);
+
       const products = data.slice(1).map((row) => {
         let rowData: { [key: string]: string } = {};
-        headers.forEach((header, index) => {
-          rowData[header] = row[index] !== undefined ? String(row[index]) : "";
+        processedHeaders.forEach((header, index) => {
+          // Usa os cabeçalhos processados
+          let value = row[index] !== undefined ? String(row[index]) : "";
+          // Se o cabeçalho original era "promo", e agora é "preço", atribui o valor à nova chave
+          if (index === promoIndex && processedHeaders[index] === "Preço") {
+            rowData["Preço"] = value; // Garante que o valor da coluna 'promo' vai para a chave 'preço'
+          } else {
+            rowData[header] = value;
+          }
         });
         return rowData as ProductData;
       });
+
       setExcelData(products);
       setShowMappingSection(true);
       addLog(
@@ -165,22 +196,18 @@ const UploadSection: React.FC<UploadSectionProps> = ({
     preview?: string | null;
   }) => (
     <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-300 rounded-lg text-center cursor-pointer hover:border-green-500 transition-all duration-300 group">
-      {" "}
-      {/* Verde */}
       <label
         htmlFor={id}
         className="cursor-pointer w-full h-full flex flex-col items-center justify-center"
       >
         <div className="p-4 rounded-full bg-gray-200 group-hover:bg-green-600 transition-colors duration-300 mb-4">
-          {" "}
-          {/* Verde */}
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
             strokeWidth={1.5}
             stroke="currentColor"
-            className="w-10 h-10 text-green-500 group-hover:text-white" // Verde
+            className="w-10 h-10 text-green-500 group-hover:text-white"
           >
             <path
               strokeLinecap="round"
@@ -190,8 +217,6 @@ const UploadSection: React.FC<UploadSectionProps> = ({
           </svg>
         </div>
         <span className="text-xl font-semibold text-gray-800 group-hover:text-green-700 transition-colors duration-300">
-          {" "}
-          {/* Verde */}
           {fileName ? `Alterar ${label}: ${fileName}` : `Carregar ${label}`}
         </span>
         <input

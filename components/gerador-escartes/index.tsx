@@ -14,7 +14,7 @@ import {
   ProductData,
   ColumnMapping,
   GeneratedOutput,
-} from "../encartes-generator-upload/interfaces";
+} from "../encartes-generator-upload/interfaces"; // <--- CERTIFIQUE-SE QUE ColumnMapping AQUI ESTÁ COM 'preço'
 import ExportOptionsSection from "../export-options-section";
 import GallerySection from "../gallery-section";
 import GenerationControls from "../generation-controls";
@@ -30,10 +30,11 @@ const GeradorEncartes: React.FC = () => {
   const [bgImage, setBgImage] = useState<string | null>(null);
   const [excelData, setExcelData] = useState<ProductData[] | null>(null);
   const [excelHeaders, setExcelHeaders] = useState<string[]>([]);
+  // CORREÇÃO 1: Inicialização do columnMapping com 'preço'
   const [columnMapping, setColumnMapping] = useState<ColumnMapping>({
     codigo: null,
     produto: null,
-    promo: null,
+    preço: null, // <-- Aqui estava 'promo', agora é 'preço'
   });
 
   const [generatedPngs, setGeneratedPngs] = useState<GeneratedOutput[]>([]);
@@ -129,10 +130,11 @@ const GeradorEncartes: React.FC = () => {
     const templateReady = templateSVG !== "";
     const bgReady = bgImage !== null;
     const excelReady = excelData !== null && excelData.length > 0;
+    // CORREÇÃO 2: Verificação do mappingReady com 'preço'
     const mappingReady =
       !!columnMapping.codigo &&
       !!columnMapping.produto &&
-      !!columnMapping.promo;
+      !!columnMapping.preço; // <-- Aqui estava 'promo', agora é 'preço'
 
     return templateReady && bgReady && excelReady && mappingReady;
   }, [templateSVG, bgImage, excelData, columnMapping]);
@@ -188,9 +190,10 @@ const GeradorEncartes: React.FC = () => {
     if (excelData && bgImage && templateSVG) {
       for (let i = 0; i < excelData.length; i++) {
         const row = excelData[i];
+        // CORREÇÃO 3: Acesso ao dado da linha do excel usando 'preço'
         const codigo = row[columnMapping.codigo!];
         const produto = row[columnMapping.produto!];
-        const preco = row[columnMapping.promo!];
+        const preco = row[columnMapping.preço!]; // <-- Aqui estava 'promo', agora é 'preço'
 
         if (!codigo || !produto || !preco) {
           addLog(
@@ -203,7 +206,7 @@ const GeradorEncartes: React.FC = () => {
           continue;
         }
 
-        const data: ProductData = { codigo, produto, preco };
+        const data: ProductData = { codigo, produto, preco }; // Certifique-se que ProductData pode receber 'preco' se for um objeto fixo, ou depende da sua estrutura
         const modifiedSvgContent = modifySVG(templateSVG, data);
 
         const filenameBase = `encarte_${normalizeString(
@@ -319,8 +322,6 @@ const GeradorEncartes: React.FC = () => {
       <div className="w-full space-y-12 max-w-7xl">
         <header className="text-center">
           <h1 className="text-5xl sm:text-6xl font-medium text-green-600 leading-tight tracking-tighter mb-4 drop-shadow-lg">
-            {" "}
-            {/* Verde */}
             Gerador de Encartes
           </h1>
           <p className="text-lg sm:text-xl text-gray-700 max-w-2xl mx-auto opacity-90">
@@ -340,7 +341,7 @@ const GeradorEncartes: React.FC = () => {
                 viewBox="0 0 24 24"
                 strokeWidth={2}
                 stroke="currentColor"
-                className="w-8 h-8 text-green-500" // Verde
+                className="w-8 h-8 text-green-500"
               >
                 <path
                   strokeLinecap="round"
@@ -410,7 +411,7 @@ const GeradorEncartes: React.FC = () => {
                 viewBox="0 0 24 24"
                 strokeWidth={2}
                 stroke="currentColor"
-                className="w-8 h-8 text-green-500" // Verde
+                className="w-8 h-8 text-green-500"
               >
                 <path
                   strokeLinecap="round"
