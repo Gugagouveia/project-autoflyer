@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Gerador de Encartes • Aramis",
+  title: "Gerador de Encartes",
   description:
     "Gere encartes promocionais de forma rápida e prática a partir de templates SVG e planilhas Excel.",
   icons: {
