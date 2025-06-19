@@ -1,7 +1,7 @@
 "use client";
 
-import GeradorEncartes from "@/components/gerador-escartes";
 import React from "react";
+import GeradorEncartes from "../components/gerador-escartes";
 
 export default function GeradorEncartesPage() {
   return (
