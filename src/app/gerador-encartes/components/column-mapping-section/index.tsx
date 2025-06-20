@@ -1,7 +1,7 @@
 "use client";
 
+import { ColumnMapping } from "@/src/lib/types/geradorEncartes";
 import React, { useState, useEffect } from "react";
-import { ColumnMapping } from "../encartes-generator-upload/interfaces";
 
 interface ColumnMappingSectionProps {
   showMappingSection: boolean;
@@ -45,7 +45,7 @@ const ColumnMappingSection: React.FC<ColumnMappingSectionProps> = ({
     if (
       !columnMapping.codigo ||
       !columnMapping.produto ||
-      !columnMapping.preço // Já verificando 'preço' aqui
+      !columnMapping.preço
     ) {
       alert("Por favor, mapeie todas as colunas necessárias.");
       addLog("Mapeamento incompleto.", "error");
@@ -65,9 +65,8 @@ const ColumnMappingSection: React.FC<ColumnMappingSectionProps> = ({
     return null;
   }
 
-  // Verificação de todas as colunas mapeadas
   const areAllColumnsMapped =
-    !!columnMapping.codigo && !!columnMapping.produto && !!columnMapping.preço; // Confirmado 'preço' aqui
+    !!columnMapping.codigo && !!columnMapping.produto && !!columnMapping.preço;
 
   return (
     <div className="bg-white p-6 rounded-xl my-8 text-left shadow-xl border border-gray-200">
@@ -113,7 +112,7 @@ const ColumnMappingSection: React.FC<ColumnMappingSectionProps> = ({
         {[
           { label: "Código", key: "codigo" },
           { label: "Produto", key: "produto" },
-          { label: "Preço", key: "preço" }, // CORREÇÃO AQUI: Label agora é "Preço"
+          { label: "Preço", key: "preço" },
         ].map(({ label, key }) => (
           <div
             key={key}

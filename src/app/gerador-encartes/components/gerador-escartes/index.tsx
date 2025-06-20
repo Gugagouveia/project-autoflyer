@@ -1,40 +1,39 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from "react";
-import { jsPDF } from "jspdf";
 import {
   modifySVG,
   normalizeString,
   composeSVGWithBGAndConvertToPNG,
-} from "@/lib/processEncartes";
+} from "@/src/lib/processEncartes";
+import jsPDF from "jspdf";
+import { useState, useCallback, useEffect } from "react";
 import ColumnMappingSection from "../column-mapping-section";
 import DiagnosticLogs from "../diagnostic-logs";
 import UploadSection from "../encartes-generator-upload";
-import {
-  ProductData,
-  ColumnMapping,
-  GeneratedOutput,
-} from "../encartes-generator-upload/interfaces"; // <--- CERTIFIQUE-SE QUE ColumnMapping AQUI ESTÁ COM 'preço'
+
 import ExportOptionsSection from "../export-options-section";
 import GallerySection from "../gallery-section";
 import GenerationControls from "../generation-controls";
+import {
+  ColumnMapping,
+  GeneratedOutput,
+  ProductData,
+} from "@/src/lib/types/geradorEncartes";
 
-const SVG_WIDTH = 1080; // Largura do encarte individual
-const SVG_HEIGHT = 1080; // Altura do encarte individual
-const GRID_COLS = 5; // Número de colunas na grade SVG
-const GRID_SPACING = 20; // Espaçamento entre encartes na grade
+const SVG_WIDTH = 1080;
+const SVG_HEIGHT = 1080;
+const GRID_COLS = 5;
+const GRID_SPACING = 20;
 
 const GeradorEncartes: React.FC = () => {
-  // State variables
   const [templateSVG, setTemplateSVG] = useState<string>("");
   const [bgImage, setBgImage] = useState<string | null>(null);
   const [excelData, setExcelData] = useState<ProductData[] | null>(null);
   const [excelHeaders, setExcelHeaders] = useState<string[]>([]);
-  // CORREÇÃO 1: Inicialização do columnMapping com 'preço'
   const [columnMapping, setColumnMapping] = useState<ColumnMapping>({
     codigo: null,
     produto: null,
-    preço: null, // <-- Aqui estava 'promo', agora é 'preço'
+    preço: null,
   });
 
   const [generatedPngs, setGeneratedPngs] = useState<GeneratedOutput[]>([]);
@@ -64,7 +63,6 @@ const GeradorEncartes: React.FC = () => {
   const [exportSvgGrid, setExportSvgGrid] = useState<boolean>(false);
   const [exportPdf, setExportPdf] = useState<boolean>(false);
 
-  // Helper functions for logging
   const addLog = useCallback(
     (
       message: string,
@@ -125,21 +123,18 @@ const GeradorEncartes: React.FC = () => {
     }
   }, [diagnosticMode, clearLogs]);
 
-  // Derived state to check if all inputs are ready for processing
   const checkInputsReady = useCallback((): boolean => {
     const templateReady = templateSVG !== "";
     const bgReady = bgImage !== null;
     const excelReady = excelData !== null && excelData.length > 0;
-    // CORREÇÃO 2: Verificação do mappingReady com 'preço'
     const mappingReady =
       !!columnMapping.codigo &&
       !!columnMapping.produto &&
-      !!columnMapping.preço; // <-- Aqui estava 'promo', agora é 'preço'
+      !!columnMapping.preço;
 
     return templateReady && bgReady && excelReady && mappingReady;
   }, [templateSVG, bgImage, excelData, columnMapping]);
 
-  // Effect to clear logs when diagnostic mode is toggled off
   useEffect(() => {
     if (!diagnosticMode) {
       clearLogs();
@@ -190,10 +185,9 @@ const GeradorEncartes: React.FC = () => {
     if (excelData && bgImage && templateSVG) {
       for (let i = 0; i < excelData.length; i++) {
         const row = excelData[i];
-        // CORREÇÃO 3: Acesso ao dado da linha do excel usando 'preço'
         const codigo = row[columnMapping.codigo!];
         const produto = row[columnMapping.produto!];
-        const preco = row[columnMapping.preço!]; // <-- Aqui estava 'promo', agora é 'preço'
+        const preco = row[columnMapping.preço!];
 
         if (!codigo || !produto || !preco) {
           addLog(
@@ -206,7 +200,7 @@ const GeradorEncartes: React.FC = () => {
           continue;
         }
 
-        const data: ProductData = { codigo, produto, preco }; // Certifique-se que ProductData pode receber 'preco' se for um objeto fixo, ou depende da sua estrutura
+        const data: ProductData = { codigo, produto, preco };
         const modifiedSvgContent = modifySVG(templateSVG, data);
 
         const filenameBase = `encarte_${normalizeString(
@@ -332,7 +326,6 @@ const GeradorEncartes: React.FC = () => {
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-          {/* Input & Control Section */}
           <section className="space-y-8 bg-white p-6 sm:p-8 rounded-xl shadow-xl border border-gray-200">
             <h2 className="text-3xl font-bold text-gray-900 mb-6 pb-4 border-b border-gray-200 flex items-center gap-3">
               <svg
@@ -402,7 +395,6 @@ const GeradorEncartes: React.FC = () => {
             />
           </section>
 
-          {/* Output & Logs Section */}
           <section className="space-y-8 bg-white p-6 sm:p-8 rounded-xl shadow-xl border border-gray-200">
             <h2 className="text-3xl font-bold text-gray-900 mb-6 pb-4 border-b border-gray-200 flex items-center gap-3">
               <svg

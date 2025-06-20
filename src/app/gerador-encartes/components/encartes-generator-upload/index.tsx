@@ -5,9 +5,9 @@ import {
   validateTemplate,
   readFileAsDataURL,
   readExcelFile,
-} from "@/lib/processEncartes";
+} from "@/src/lib/processEncartes";
+import { ProductData } from "@/src/lib/types/geradorEncartes";
 import React from "react";
-import { ProductData } from "./interfaces";
 
 interface UploadSectionProps {
   templateSVG: string;

@@ -3,8 +3,9 @@
 import React from "react";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
-import { GeneratedOutput } from "../encartes-generator-upload/interfaces";
-import { Button } from "../ui/button"; // Importado seu componente de botão
+
+import { Button } from "../../../../components/ui/button";
+import { GeneratedOutput } from "@/src/lib/types/geradorEncartes";
 
 interface GallerySectionProps {
   showGallery: boolean;
@@ -21,7 +22,7 @@ interface GallerySectionProps {
   ) => void;
 }
 
-const GallerySection: React.FC<GallerySectionProps> = ({
+export const GallerySection: React.FC<GallerySectionProps> = ({
   showGallery,
   exportPng,
   exportSvgGrid,
@@ -31,9 +32,24 @@ const GallerySection: React.FC<GallerySectionProps> = ({
   generatedPdf,
   addLog,
 }) => {
+  const handleDownloadError = (message: string, error: any) => {
+    addLog(message, "error", error);
+    alert(message);
+  };
+
+  const handleDownloadSuccess = (message: string) => {
+    addLog(message, "success");
+  };
+
   const downloadAllPngs = async () => {
     addLog("Iniciando download de todos os PNGs (ZIP)...", "step");
     const zip = new JSZip();
+
+    if (generatedPngs.length === 0) {
+      handleDownloadError("Nenhum PNG gerado para baixar.", null);
+      return;
+    }
+
     generatedPngs.forEach((png) => {
       if (png.dataUrl) {
         const base64Data = png.dataUrl.split(",")[1];
@@ -44,22 +60,22 @@ const GallerySection: React.FC<GallerySectionProps> = ({
     try {
       const content = await zip.generateAsync({ type: "blob" });
       saveAs(content, "encartes_pngs.zip");
-      addLog("Download de PNGs concluído.", "success");
+      handleDownloadSuccess("Download de PNGs concluído.");
     } catch (error: any) {
-      addLog("Erro ao gerar ZIP de PNGs.", "error", error);
+      handleDownloadError("Erro ao gerar ZIP de PNGs.", error);
     }
   };
 
   const downloadSvgGrid = () => {
-    if (generatedSvgGrid) {
+    if (generatedSvgGrid?.svgString) {
       addLog("Iniciando download do SVG (grade única)...", "step");
-      const blob = new Blob([generatedSvgGrid.svgString!], {
+      const blob = new Blob([generatedSvgGrid.svgString], {
         type: "image/svg+xml",
       });
       saveAs(blob, generatedSvgGrid.filename);
-      addLog("Download do SVG da grade concluído.", "success");
+      handleDownloadSuccess("Download do SVG da grade concluído.");
     } else {
-      addLog("Nenhum SVG de grade única para baixar.", "error");
+      handleDownloadError("Nenhum SVG de grade única para baixar.", null);
     }
   };
 
@@ -67,9 +83,9 @@ const GallerySection: React.FC<GallerySectionProps> = ({
     if (generatedPdf) {
       addLog("Iniciando download do PDF...", "step");
       saveAs(generatedPdf, "encartes.pdf");
-      addLog("Download do PDF concluído.", "success");
+      handleDownloadSuccess("Download do PDF concluído.");
     } else {
-      addLog("Nenhum PDF para baixar.", "error");
+      handleDownloadError("Nenhum PDF para baixar.", null);
     }
   };
 
@@ -84,13 +100,7 @@ const GallerySection: React.FC<GallerySectionProps> = ({
       </h2>
       <div className="flex flex-wrap justify-center gap-4 mt-6">
         {exportPng && generatedPngs.length > 0 && (
-          // Usando o componente Button importado
-          <Button
-            onClick={downloadAllPngs}
-            className="flex items-center gap-2 py-2 px-5 rounded-lg font-semibold shadow-md transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-50"
-            // Se o Button padrão já for verde, não precisa de bg/hover explícito aqui
-            // Caso contrário, adicione: bg-green-600 hover:bg-green-700
-          >
+          <Button onClick={downloadAllPngs} className="gap-2">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -109,11 +119,7 @@ const GallerySection: React.FC<GallerySectionProps> = ({
           </Button>
         )}
         {exportSvgGrid && generatedSvgGrid && (
-          // Usando um botão HTML normal e aplicando as classes diretamente
-          <button
-            onClick={downloadSvgGrid}
-            className="flex items-center gap-2 bg-green-600 text-white py-2 px-5 rounded-lg font-semibold shadow-md transition-all duration-300 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-50"
-          >
+          <Button onClick={downloadSvgGrid} className="gap-2">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -129,14 +135,10 @@ const GallerySection: React.FC<GallerySectionProps> = ({
               />
             </svg>
             Baixar SVG Grade Única
-          </button>
+          </Button>
         )}
         {exportPdf && generatedPdf && (
-          // Usando um botão HTML normal e aplicando as classes diretamente
-          <button
-            onClick={downloadPdf}
-            className="flex items-center gap-2 bg-green-600 text-white py-2 px-5 rounded-lg font-semibold shadow-md transition-all duration-300 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-50"
-          >
+          <Button onClick={downloadPdf} className="gap-2">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -152,7 +154,7 @@ const GallerySection: React.FC<GallerySectionProps> = ({
               />
             </svg>
             Baixar PDF
-          </button>
+          </Button>
         )}
       </div>
 
