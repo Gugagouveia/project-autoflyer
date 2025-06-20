@@ -1,6 +1,5 @@
-// lib/GeradorEncartes/utils.ts
-import { ProductData } from "@/components/encartes-generator-upload/interfaces";
 import * as XLSX from "xlsx";
+import { ProductData } from "./types/geradorEncartes";
 
 export const normalizeString = (str: string): string => {
   if (typeof str !== "string") return "";

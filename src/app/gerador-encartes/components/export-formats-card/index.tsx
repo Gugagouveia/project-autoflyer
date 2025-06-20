@@ -2,11 +2,11 @@
 
 import {
   Card,
-  CardHeader,
-  CardTitle,
   CardContent,
   CardDescription,
-} from "@/components/ui/card";
+  CardHeader,
+  CardTitle,
+} from "@/src/components/ui/card";
 import { Checkbox, CheckboxIndicator } from "@radix-ui/react-checkbox";
 import { Label } from "@radix-ui/react-label";
 import { Check } from "lucide-react";
