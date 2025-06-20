@@ -38,17 +38,19 @@ export const CanvasComposer: React.FC<CanvasComposerProps> = ({
       const productMarginX = 100;
       const productMarginY = canvas.height * 0.4;
 
-      let currentProductWidth = productImage.naturalWidth * productZoom;
-      let currentProductHeight = productImage.naturalHeight * productZoom;
+      const baseProductWidth = productImage.naturalWidth;
+      const baseProductHeight = productImage.naturalHeight;
 
       const maxProductWidthPercentage = 0.3;
       const maxProductWidth = canvas.width * maxProductWidthPercentage;
 
-      if (currentProductWidth > maxProductWidth) {
-        const scaleFactor = maxProductWidth / currentProductWidth;
-        currentProductWidth = maxProductWidth;
-        currentProductHeight = currentProductHeight * scaleFactor;
+      let scaleFactor = 1;
+      if (baseProductWidth > maxProductWidth) {
+        scaleFactor = maxProductWidth / baseProductWidth;
       }
+
+      const finalProductWidth = baseProductWidth * scaleFactor * productZoom;
+      const finalProductHeight = baseProductHeight * scaleFactor * productZoom;
 
       const productX = productMarginX;
       const productY = productMarginY;
@@ -57,8 +59,8 @@ export const CanvasComposer: React.FC<CanvasComposerProps> = ({
         productImage,
         productX,
         productY,
-        currentProductWidth,
-        currentProductHeight
+        finalProductWidth,
+        finalProductHeight
       );
     }
     onCompositionReady(canvas.toDataURL("image/png"));
@@ -108,7 +110,7 @@ export const CanvasComposer: React.FC<CanvasComposerProps> = ({
             className="mt-1 block w-full appearance-none bg-gray-300 h-2 rounded-lg cursor-pointer accent-blue-500"
           />
           <span className="text-sm text-gray-500">
-            Zoom atual: **{productZoom.toFixed(2)}x**
+            Zoom atual: <strong>{productZoom.toFixed(2)}x</strong>
           </span>
         </div>
       )}
