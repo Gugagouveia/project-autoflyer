@@ -1,3 +1,14 @@
+"use client";
+
+import { Separator } from "@/components/ui/separator";
+import { Slider } from "@/components/ui/slider";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "@/src/components/ui/card";
+import { Label } from "@radix-ui/react-label";
 import React, { useRef, useEffect, useCallback, useState } from "react";
 
 interface CanvasComposerProps {
@@ -15,6 +26,8 @@ export const CanvasComposer: React.FC<CanvasComposerProps> = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [productZoom, setProductZoom] = useState(1);
+  const [offsetX, setOffsetX] = useState(100);
+  const [offsetY, setOffsetY] = useState(0);
 
   const drawComposition = useCallback(() => {
     const canvas = canvasRef.current;
@@ -35,9 +48,6 @@ export const CanvasComposer: React.FC<CanvasComposerProps> = ({
     ctx.drawImage(escarteImage, 0, 0, canvas.width, canvas.height);
 
     if (productImage) {
-      const productMarginX = 100;
-      const productMarginY = canvas.height * 0.4;
-
       const baseProductWidth = productImage.naturalWidth;
       const baseProductHeight = productImage.naturalHeight;
 
@@ -52,8 +62,8 @@ export const CanvasComposer: React.FC<CanvasComposerProps> = ({
       const finalProductWidth = baseProductWidth * scaleFactor * productZoom;
       const finalProductHeight = baseProductHeight * scaleFactor * productZoom;
 
-      const productX = productMarginX;
-      const productY = productMarginY;
+      const productX = offsetX;
+      const productY = canvas.height * 0.4 + offsetY;
 
       ctx.drawImage(
         productImage,
@@ -63,11 +73,14 @@ export const CanvasComposer: React.FC<CanvasComposerProps> = ({
         finalProductHeight
       );
     }
+
     onCompositionReady(canvas.toDataURL("image/png"));
   }, [
     escarteImage,
     productImage,
     productZoom,
+    offsetX,
+    offsetY,
     onCompositionReady,
     onCompositionNotReady,
   ]);
@@ -76,43 +89,71 @@ export const CanvasComposer: React.FC<CanvasComposerProps> = ({
     drawComposition();
   }, [drawComposition]);
 
-  const handleZoomChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      setProductZoom(parseFloat(event.target.value));
-    },
-    []
-  );
+  const canvasWidth = canvasRef.current?.width || 1000;
+  const canvasHeight = canvasRef.current?.height || 1000;
 
   return (
-    <div className="border border-gray-300 bg-gray-200 mt-5 inline-block max-w-full overflow-auto">
-      <canvas
-        ref={canvasRef}
-        className="block bg-transparent max-w-full h-auto"
-      ></canvas>
+    <div className="flex flex-col gap-4 mt-5">
+      <div className="border rounded-xl bg-muted flex justify-center p-4">
+        <canvas ref={canvasRef} className="bg-transparent max-w-full h-auto" />
+      </div>
 
       {productImage && (
-        <div className="mt-3 p-3 bg-white rounded shadow">
-          <label
-            htmlFor="productZoom"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Ajustar Zoom do Produto:
-          </label>
-          <input
-            type="range"
-            id="productZoom"
-            name="productZoom"
-            min="0.1"
-            max="5"
-            step="0.05"
-            value={productZoom}
-            onChange={handleZoomChange}
-            className="mt-1 block w-full appearance-none bg-gray-300 h-2 rounded-lg cursor-pointer accent-blue-500"
-          />
-          <span className="text-sm text-gray-500">
-            Zoom atual: <strong>{productZoom.toFixed(2)}x</strong>
-          </span>
-        </div>
+        <Card className="w-full">
+          <CardHeader>
+            <CardTitle>Configurações do Produto</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Zoom */}
+            <div className="space-y-2">
+              <Label>Zoom do Produto</Label>
+              <Slider
+                min={0.1}
+                max={5}
+                step={0.05}
+                value={[productZoom]}
+                onValueChange={(value) => setProductZoom(value[0])}
+              />
+              <div className="text-sm text-muted-foreground">
+                Zoom atual: <strong>{productZoom.toFixed(2)}x</strong>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Posição Horizontal */}
+            <div className="space-y-2">
+              <Label>Posição Horizontal (X)</Label>
+              <Slider
+                min={-canvasWidth}
+                max={canvasWidth}
+                step={1}
+                value={[offsetX]}
+                onValueChange={(value) => setOffsetX(value[0])}
+              />
+              <div className="text-sm text-muted-foreground">
+                Deslocamento X: <strong>{offsetX}px</strong>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Posição Vertical */}
+            <div className="space-y-2">
+              <Label>Posição Vertical (Y)</Label>
+              <Slider
+                min={-canvasHeight}
+                max={canvasHeight}
+                step={1}
+                value={[offsetY]}
+                onValueChange={(value) => setOffsetY(value[0])}
+              />
+              <div className="text-sm text-muted-foreground">
+                Deslocamento Y: <strong>{offsetY}px</strong>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       )}
     </div>
   );
