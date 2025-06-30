@@ -121,7 +121,6 @@ export const CanvasComposer: React.FC<CanvasComposerProps> = ({
 
             <Separator />
 
-            {/* Posição Horizontal */}
             <div className="space-y-2">
               <Label>Posição Horizontal (X)</Label>
               <Slider
@@ -138,7 +137,6 @@ export const CanvasComposer: React.FC<CanvasComposerProps> = ({
 
             <Separator />
 
-            {/* Posição Vertical */}
             <div className="space-y-2">
               <Label>Posição Vertical (Y)</Label>
               <Slider
