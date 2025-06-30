@@ -1,7 +1,7 @@
 "use client";
 
-import { Separator } from "@/components/ui/separator";
-import { Slider } from "@/components/ui/slider";
+import { Separator } from "@/src/components/separator";
+import { Slider } from "@/src/components/ui/slider";
 import {
   Card,
   CardHeader,
